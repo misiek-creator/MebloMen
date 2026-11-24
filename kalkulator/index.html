@@ -306,8 +306,8 @@ function drawFig(R){
   blends.forEach(b=>g+=poly([[b.x1,0],[b.x2,0],[b.x2,b.h2],[b.x1,b.h1]],frS));
   strips.forEach(s=>g+=poly(s.pts,p.bpMat==='Front'?frS:'fill="var(--oak)" stroke="var(--ink)" stroke-width="1.2"'));
   fronts.forEach(f=>g+=poly([[f.x1,f.yb],[f.x2,f.yb],[f.x2,f.yb+f.h2],[f.x1,f.yb+f.h1]],'fill="none" stroke="#2f7d9c" stroke-width="1" stroke-dasharray="2 3"'));
-  const fs=Wpx<520?11:13;
-  const txt=(x,y,s,anchor,rot)=>`<text x="${x}" y="${y}" font-size="${fs}" font-family="Barlow" font-weight="600" fill="var(--ink)" text-anchor="${anchor||'middle'}" paint-order="stroke" stroke="var(--card)" stroke-width="4" ${rot?`transform="rotate(-90 ${x} ${y})"`:''}>${s}</text>`;
+  const fs=Wpx<520?13:14;
+  const txt=(x,y,s,anchor,rot)=>`<text x="${x}" y="${y}" font-size="${fs}" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600" fill="var(--ink)" text-anchor="${anchor||'middle'}" paint-order="stroke" stroke="var(--card)" stroke-width="3" stroke-linejoin="round" text-rendering="geometricPrecision" ${rot?`transform="rotate(-90 ${x} ${y})"`:''}>${s}</text>`;
   const by=Y(0)+fs+8,dim=(a,b,l)=>`<line x1="${X(a)}" y1="${by-fs/2-2}" x2="${X(b)}" y2="${by-fs/2-2}" stroke="var(--ink)" stroke-width="0.8"/><line x1="${X(b)}" y1="${by-fs}" x2="${X(b)}" y2="${by}" stroke="var(--ink)" stroke-width="0.8"/>`+txt((X(a)+X(b))/2,by+4,l);
   g+=dim(0,W,(flat?'skos ':'szer. ')+fmt(W));if(flat)g+=dim(xA,0,'prosta '+fmt(Wp));
   const xt=X(xA)+(mir?14:-14),xlo=X(W)+(mir?-14:14);
@@ -356,7 +356,7 @@ function render(){
     N.sheets.forEach((sh,si)=>{
       const vb=`0 0 ${R.p.SL} ${R.p.SW}`,tr=R.p.trim;
       const fill=m==='HDF 3'?'var(--hdf)':m==='Front'?'var(--front)':'var(--oak2)';
-      const pcs=sh.pcs.map(c=>{const fsz=Math.min(90,c.b*0.45,c.a*0.3);return `<rect x="${c.x+tr}" y="${c.y+tr}" width="${c.a}" height="${c.b}" fill="${fill}" stroke="var(--ink)" stroke-width="3"/>`+(fsz>=28?`<text x="${c.x+tr+c.a/2}" y="${c.y+tr+c.b/2}" font-size="${fsz}" font-family="Barlow" font-weight="600" fill="var(--ink)" text-anchor="middle" dominant-baseline="central">${c.no}${c.a>fsz*7?` · ${fmt(c.a)}×${fmt(c.b)}`:''}</text>`:'')}).join('');
+      const pcs=sh.pcs.map(c=>{const fsz=Math.min(90,c.b*0.45,c.a*0.3);return `<rect x="${c.x+tr}" y="${c.y+tr}" width="${c.a}" height="${c.b}" fill="${fill}" stroke="var(--ink)" stroke-width="3"/>`+(fsz>=28?`<text x="${c.x+tr+c.a/2}" y="${c.y+tr+c.b/2}" font-size="${fsz}" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600" fill="var(--ink)" text-anchor="middle" dominant-baseline="central">${c.no}${c.a>fsz*7?` · ${fmt(c.a)}×${fmt(c.b)}`:''}</text>`:'')}).join('');
       html+=`<div class="sheet panel"><h3>${m} — arkusz ${si+1} z ${N.sheets.length}${si===0?` · wykorzystanie ${Math.round(use*100)}%`:''}</h3><svg viewBox="${vb}" role="img" aria-label="${m} arkusz ${si+1}"><rect width="${R.p.SL}" height="${R.p.SW}" fill="var(--bg)" stroke="var(--mute)" stroke-width="4" stroke-dasharray="20 14"/>${pcs}</svg></div>`});
   });
   $('sheets').innerHTML=html;
@@ -366,7 +366,7 @@ function render(){
     const card=f=>{const w=f.x2-f.x1,hm=Math.max(f.L,f.R),bw=250,bh=270,k=Math.min((bw-90)/w,(bh-70)/hm);
       const W2=w*k,L=f.L*k,Rr=f.R*k,x0=(bw-W2)/2,yb=bh-30;
       const pts=[[x0,yb],[x0+W2,yb],[x0+W2,yb-Rr],[x0,yb-L]];
-      const T=(x,y,t,a,col,rot)=>`<text x="${x}" y="${y}" font-size="13" font-family="Barlow" font-weight="600" fill="${col||'var(--ink)'}" text-anchor="${a||'middle'}" ${rot?`transform="rotate(-90 ${x} ${y})"`:''}>${t}</text>`;
+      const T=(x,y,t,a,col,rot)=>`<text x="${x}" y="${y}" font-size="13" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600" fill="${col||'var(--ink)'}" text-anchor="${a||'middle'}" ${rot?`transform="rotate(-90 ${x} ${y})"`:''}>${t}</text>`;
       const top=Math.hypot(w,f.L-f.R),hi=f.L>f.R;
       return `<div class="sheet"><h3>Front ${f.no} · ${f.sc.flat?'część prosta':'sekcja '+f.sc.no}</h3><svg viewBox="0 0 ${bw} ${bh}" style="max-width:300px" aria-label="Front ${f.no}"><polygon points="${pts.map(q=>q.join(',')).join(' ')}" fill="var(--front)" stroke="var(--ink)" stroke-width="2"/>`+
         T(x0+W2/2,yb+18,fmt(w))+T(x0-10,yb-L/2,fmt(f.L),'middle','',1)+T(x0+W2+18,yb-Rr/2,fmt(f.R),'middle','',1)+
@@ -377,7 +377,7 @@ function render(){
   if(si){
     const dg=fmt(R.deg),dk=fmt(90-R.deg),tA=Math.tan(R.deg*Math.PI/180);
     const L=470,h=74,o=h*tA,x0=40,y0=40,tot=L+o;
-    const T=(x,y,t,a,col)=>`<text x="${x}" y="${y}" font-size="14" font-family="Barlow" font-weight="600" fill="${col||'var(--ink)'}" text-anchor="${a||'middle'}">${t}</text>`;
+    const T=(x,y,t,a,col)=>`<text x="${x}" y="${y}" font-size="14" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600" fill="${col||'var(--ink)'}" text-anchor="${a||'middle'}">${t}</text>`;
     const ln=(x1,y1,x2,y2,d)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--ink)" stroke-width="1" ${d?'stroke-dasharray="4 4"':''}/>`;
     const tick=(x,y)=>ln(x,y-6,x,y+6);
     const fill=si.mat==='Front'?'var(--front)':'var(--oak)';
@@ -388,7 +388,7 @@ function render(){
     g+=ln(x0,y0-18,x0+L,y0-18)+tick(x0,y0-18)+tick(x0+L,y0-18)+T(x0+L/2,y0-24,'krawędź górna (pod sufitem) '+fmt(si.edge));
     g+=T(x0+o+L/2,y0+h-12,'krawędź dolna (nad frontami) '+fmt(si.edge));
     g+=ln(x0+tot+14,y0,x0+tot+14,y0+h)+`<line x1="${x0+L}" y1="${y0}" x2="${x0+tot+20}" y2="${y0}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3"/>`+tick(x0+tot+14,y0)+tick(x0+tot+14,y0+h);
-    g+=`<text x="${x0+tot+30}" y="${y0+h/2+5}" font-size="14" font-family="Barlow" font-weight="600" fill="var(--ink)">${fmt(si.hB)}</text>`;
+    g+=`<text x="${x0+tot+30}" y="${y0+h/2+5}" font-size="14" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600" fill="var(--ink)">${fmt(si.hB)}</text>`;
     g+=ln(x0,y0,x0,y0+h,1)+T(x0+o/2+16,y0+h-6,dg+'°','start','var(--red)')+ln(x0+L,y0,x0+L,y0+h,1)+T(x0+L-8,y0+18,dg+'°','end','var(--red)');
     let flatSvg='';
     if(si.flatLen){const fl=200;flatSvg=`<svg viewBox="0 0 340 120" style="width:100%;max-width:330px;height:auto;display:block" aria-label="Blenda pozioma, część prosta"><rect x="20" y="30" width="${fl}" height="${h*0.6}" fill="${fill}" stroke="var(--ink)" stroke-width="2"/>${ln(20,95,20+fl,95)}${tick(20,95)}${tick(20+fl,95)}${T(20+fl/2,114,fmt(si.flatLen))}${T(20+fl/2,22,'część prosta')}${T(20+fl+34,30+h*0.3+5,fmt(si.hBv))}</svg>`}
@@ -406,7 +406,7 @@ function render(){
   }
   const tops=R.P.filter(q=>q.skos);const t=R.p.t,dg=fmt(R.deg),k90=fmt(90-R.deg);
   $('cut').innerHTML=`<h2 style="font-size:24px">Jak dociąć wieńce górne (skosy)</h2>
-  <svg viewBox="0 0 520 150" style="width:100%;max-width:520px;height:auto;display:block;margin:4px 0 10px" aria-label="Przekrój wieńca górnego"><polygon points="40,110 420,110 470,40 90,40" fill="var(--oak2)" stroke="var(--ink)" stroke-width="2"/><line x1="90" y1="40" x2="90" y2="110" stroke="var(--red)" stroke-dasharray="4 4"/><line x1="420" y1="110" x2="420" y2="40" stroke="var(--red)" stroke-dasharray="4 4"/><text x="255" y="30" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="Barlow" font-weight="600">krawędź górna = dolna</text><text x="255" y="135" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="Barlow" font-weight="600">formatka wyjściowa (najdłuższy wymiar)</text><text x="64" y="80" text-anchor="middle" font-size="14" fill="var(--red)" font-family="Barlow" font-weight="600">${dg}°</text><text x="446" y="80" text-anchor="middle" font-size="14" fill="var(--red)" font-family="Barlow" font-weight="600">${dg}°</text></svg>
+  <svg viewBox="0 0 520 150" style="width:100%;max-width:520px;height:auto;display:block;margin:4px 0 10px" aria-label="Przekrój wieńca górnego"><polygon points="40,110 420,110 470,40 90,40" fill="var(--oak2)" stroke="var(--ink)" stroke-width="2"/><line x1="90" y1="40" x2="90" y2="110" stroke="var(--red)" stroke-dasharray="4 4"/><line x1="420" y1="110" x2="420" y2="40" stroke="var(--red)" stroke-dasharray="4 4"/><text x="255" y="30" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600">krawędź górna = dolna</text><text x="255" y="135" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600">formatka wyjściowa (najdłuższy wymiar)</text><text x="64" y="80" text-anchor="middle" font-size="14" fill="var(--red)" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600">${dg}°</text><text x="446" y="80" text-anchor="middle" font-size="14" fill="var(--red)" font-family="Barlow, Roboto, Arial, sans-serif" font-weight="600">${dg}°</text></svg>
   <ol style="margin:0;padding-left:20px">
    <li>Wytnij formatkę prostokątną na długość wyjściową (tabela poniżej) × głębokość ${fmt(R.p.D)}.</li>
    <li>Pochyl piłę o <b>${dg}°</b> (czyli cięcie ${k90}° do powierzchni płyty).</li>
@@ -425,6 +425,7 @@ function render(){
 }
 
 const ro=new ResizeObserver(()=>drawFig(lastP&&!lastP.err?lastP:null));ro.observe($('figbox'));
+try{document.fonts.ready.then(()=>render())}catch(e){}
 $('f').addEventListener('input',render);$('f').addEventListener('change',render);
 $('f').addEventListener('submit',e=>e.preventDefault());
 $('reset').addEventListener('click',()=>{secVals=[];secFr=[];$('secw').innerHTML='';$('secf').innerHTML='';ids.forEach(i=>{const e=$(i);if(e.type==='checkbox')e.checked=defaults[i];else e.value=defaults[i]});render()});
