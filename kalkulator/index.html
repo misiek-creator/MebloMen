@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalkulator szaf skośnych</title>
+<meta name="theme-color" content="#1d2124">
+<meta name="description" content="Kalkulator szaf skośnych MebloMen: rozkrój, fronty, blendy i koszt materiału.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-64.png">
+<link rel="apple-touch-icon" href="icons/apple-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* VOICE: warsztatowy, rzeczowy — narzędzie stolarza, nie folder reklamowy
+   IDEA: karta rozkroju przypięta przy pile — rysunek, lista formatek, arkusze
+   PICTURE: widok z przodu szafy pod skosem z wymiarami, rysowany na żywo
+   COLOUR and TYPE: biała płyta, grafit, dąb #c99a5b, czerwony ołówek #d23c2a; Barlow Condensed + Barlow
+   LAYOUT: parametry z lewej, duży rysunek z prawej; niżej formatki i arkusze */
+:root{color-scheme:light dark;--bg:light-dark(#f7f6f3,#16181a);--card:light-dark(#fff,#1f2224);--ink:light-dark(#1d2124,#e9e7e2);--mute:light-dark(#646b70,#9aa1a6);--line:light-dark(#d9d6cf,#33383b);--oak:#c99a5b;--oak2:light-dark(#f1e2cc,#4a3b27);--red:#d23c2a;--hdf:light-dark(#d9cdbb,#5a5246);--front:light-dark(#cfd8dc,#3c4a52)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Barlow,system-ui,sans-serif;overflow-x:clip}
+.band{padding:clamp(20px,3vw,40px) max(4vw,14px);max-width:1240px;margin:0 auto}
+h1,h2{font-family:"Barlow Condensed",sans-serif;line-height:1.05;margin:0;text-wrap:balance}
+h1{font-size:clamp(28px,5vw,46px)}.brand{display:flex;align-items:center;gap:14px}.brand img{border-radius:12px;flex:none}.by{margin:2px 0 0;font-weight:600;color:var(--oak);letter-spacing:.02em}h2{font-size:28px;margin-bottom:12px}
+.sub{color:var(--mute);margin:6px 0 0}
+.top{display:grid;grid-template-columns:minmax(0,340px) minmax(0,1fr);gap:24px;margin-top:20px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 12px}
+label{display:block;font-size:14px;font-weight:600;color:var(--mute)}
+input[type=number],select{display:block;width:100%;margin-top:3px;font:16px Barlow,sans-serif;padding:9px 10px;min-height:44px;border:1px solid var(--line);border-radius:7px;background:var(--bg);color:var(--ink)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--red);outline-offset:1px}
+.chk{display:flex;align-items:center;gap:8px;min-height:44px;color:var(--ink);font-weight:500}
+.chk input{width:20px;height:20px;accent-color:var(--red)}
+fieldset{border:0;border-top:1px solid var(--line);margin:14px 0 0;padding:12px 0 0}
+legend{font-family:"Barlow Condensed";font-size:19px;font-weight:700;padding:0 6px 0 0}
+.figwrap{display:flex;flex-direction:column;position:sticky;top:12px;align-self:start}.fig{position:relative;height:clamp(340px,72vh,700px)}.fig>svg{position:absolute;inset:0;width:100%;height:100%}
+.stats{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px}
+.stat b{display:block;font-family:"Barlow Condensed";font-size:30px;line-height:1}
+.stat span{font-size:13px;color:var(--mute)}
+.err{color:var(--red);font-weight:600;margin:8px 0 0}
+.costl{margin:12px 0 0;padding-top:10px;border-top:1px solid var(--line);font-size:15px}.costl b{font-family:'Barlow Condensed';font-size:30px;margin-right:4px}
+table{border-collapse:collapse;width:100%;font-size:15px}
+th,td{padding:8px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--mute);font-weight:600}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tag{display:inline-block;width:26px;height:22px;line-height:22px;text-align:center;border-radius:4px;font-weight:600;font-size:13px;background:var(--oak2)}
+.note{font-size:13px;color:var(--mute)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 12px}
+button{font:600 15px Barlow,sans-serif;min-height:44px;padding:0 16px;border-radius:7px;border:1px solid var(--ink);background:var(--ink);color:var(--bg);cursor:pointer}
+button.ghost{background:transparent;color:var(--ink)}
+.sheets{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,520px),1fr));gap:16px}
+.sheet h3{margin:0 0 6px;font:600 15px Barlow}
+.sheet svg{width:100%;height:auto;display:block;border-radius:4px}
+pre,.scroll{overflow-x:auto}
+@media(max-width:820px){.top{grid-template-columns:minmax(0,1fr)}.fig{height:min(62vh,420px)}.figwrap{order:-1;position:static}}
+@media(max-width:600px){table{font-size:13px}.stack thead{display:none}.stack tr{display:grid;padding-block:10px;border-bottom:1px solid var(--line)}.stack td{display:flow-root;border:0;padding:3px 0;padding-inline-start:8em;text-align:start}.stack td::before{content:attr(data-l);float:inline-start;width:7.5em;margin-inline-start:-8em;white-space:normal;color:var(--mute)}.stack td:empty{display:none}}
+</style><script>new MutationObserver(()=>{for(const c of document.querySelectorAll('.stack td:not([data-l])')){let i=0,p=c;while(p=p.previousElementSibling)i+=p.colSpan;c.dataset.l=c.closest('table').rows[0].cells[i]?.textContent||''}}).observe(document,{childList:true,subtree:true})</script></head>
+<body>
+<div class="band">
+  <div class="brand"><img src="icons/icon-192.png" alt="" width="52" height="52"><div><h1>Kalkulator szaf skośnych</h1><p class="by">MebloMen</p></div></div>
+  <p class="sub">Boki i przegrody na cokole, wieńce dolne, górne i półki między nimi, osobno w każdej sekcji. Wymiary w mm.</p>
+
+  <div class="top">
+    <form class="panel" id="f" autocomplete="off">
+      <fieldset style="border:0;margin:0;padding:0"><legend>Pomiar</legend>
+      <div class="grid2">
+        <label>Szerokość<input type="number" id="W" value="1800" min="300" step="1"></label>
+        <label>Głębokość<input type="number" id="D" value="600" min="200" step="1"></label>
+        <label>Wysokość (wysoka strona)<input type="number" id="H" value="2400" min="300" step="1"></label>
+        <label>Ścianka kolankowa<input type="number" id="Hk" value="1000" min="100" step="1"></label>
+        <label>Niska strona<select id="low"><option value="R">prawa</option><option value="L">lewa</option></select></label>
+        <label>Luz pod skosem<input type="number" id="luz" value="5" min="0" step="1"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="flat"> Za wysoką stroną część prosta pod płaskim sufitem</label>
+      <label>Szerokość części prostej<input type="number" id="Wp" value="600" min="200" step="1"></label>
+      <p class="note" style="margin:4px 0 0">Sufit tam = wysokość wysokiej strony. Dostaje własną prostokątną sekcję i przegrodę pełnej wysokości.</p>
+      </fieldset>
+      <fieldset><legend>Korpus</legend>
+      <div class="grid2">
+        <label>Grubość płyty<input type="number" id="t" value="18" min="8" step="1"></label>
+        <label>Cokół (0 = brak)<input type="number" id="cok" value="100" min="0" step="1"></label>
+        <label>Liczba sekcji<input type="number" id="n" value="3" min="1" max="12" step="1"></label>
+        <label>Półki w sekcji<input type="number" id="pol" value="3" min="0" max="12" step="1"></label>
+        <label>Cofnięcie półek<input type="number" id="pcof" value="10" min="0" step="1"></label>
+      </div>
+      <p class="note" style="margin:12px 0 4px">Sekcje pod skosem od lewej: szerokość w świetle. Puste = reszta po równo.</p>
+      <div class="grid2" id="secw"></div>
+      <label class="chk"><input type="checkbox" id="plecy" checked> Plecy HDF 3 mm (na sekcję: wieniec + 2× grubość płyty − 3 mm)</label>
+      <label class="chk"><input type="checkbox" id="bokiFr"> Boki z płyty frontowej</label>
+      </fieldset>
+      <fieldset><legend>Blendy przy ścianach</legend>
+      <div class="grid2">
+        <label class="chk"><input type="checkbox" id="bLon"> Blenda lewa</label>
+        <label>Szerokość lewej<input type="number" id="bL" value="18" min="0" step="1"></label>
+        <label class="chk"><input type="checkbox" id="bRon"> Blenda prawa</label>
+        <label>Szerokość prawej<input type="number" id="bR" value="18" min="0" step="1"></label>
+        <label>Głębokość blend bocznych<input type="number" id="bD" value="0" min="0" step="1"></label>
+      </div>
+      <p class="note" style="margin:4px 0 0">Głębokość: listwa przy ścianie za blendą, tworzy literę L (0 = bez listwy).</p>
+      <p class="note" style="margin:4px 0 0">Blenda od podłogi pod skos, z płyty frontowej. Szafa zwęża się o jej szerokość.</p>
+      </fieldset>
+      <fieldset><legend>Fronty</legend>
+      <label class="chk"><input type="checkbox" id="fr" checked> Licz fronty nakładane</label>
+      <p class="note" style="margin:0 0 4px">Liczba frontów w sekcji (auto = według maks. szerokości drzwi). Gdy szerokości sekcji są „auto”, sekcje dobieram tak, żeby wszystkie fronty miały tę samą szerokość. Dół frontu równo z dolną krawędzią wieńca dolnego; góra = pod blendą minus szczelina.</p>
+      <div class="grid2" id="secf"></div>
+      <label id="sfPl" style="margin-top:10px">Część prosta — fronty<select id="sfP"><option value="auto">auto</option><option value="1" selected>1 front</option><option value="2">2 fronty</option></select></label>
+      <label class="chk"><input type="checkbox" id="bp"> Blenda pozioma nad frontami (wzdłuż skosu)</label>
+      <div class="grid2">
+        <label>Wysokość blendy<input type="number" id="bpH" value="100" min="20" step="1"></label>
+        <label>Kolor blendy<select id="bpMat"><option value="Front">jak fronty</option><option value="Płyta">jak korpus</option></select></label>
+      </div>
+      <div class="grid2">
+        <label>Szczelina<input type="number" id="szc" value="3" min="0" step="0.5"></label>
+        <label>Maks. szer. drzwi<input type="number" id="fmax" value="600" min="200" step="1"></label>
+      </div></fieldset>
+      <fieldset><legend>Arkusz i piła</legend>
+      <div class="grid2">
+        <label>Arkusz dł.<input type="number" id="SL" value="2800" step="1"></label>
+        <label>Arkusz szer.<input type="number" id="SW" value="2070" step="1"></label>
+        <label>Rzaz piły<input type="number" id="kerf" value="4" min="0" step="0.5"></label>
+        <label>Okrawanie<input type="number" id="trim" value="10" min="0" step="1"></label>
+      </div>
+      <label class="chk"><input type="checkbox" id="grain" checked> Słoje (nie obracaj formatek)</label>
+      </fieldset>
+      <fieldset><legend>Ceny (zł brutto)</legend>
+      <div class="grid2">
+        <label>Arkusz płyty korpus.<input type="number" id="cP" value="0" min="0" step="1"></label>
+        <label>Arkusz płyty front.<input type="number" id="cF" value="0" min="0" step="1"></label>
+        <label>Arkusz HDF<input type="number" id="cH" value="0" min="0" step="1"></label>
+        <label>Obrzeże za 1 mb<input type="number" id="cO" value="0" min="0" step="0.1"></label>
+      </div></fieldset>
+      <button type="button" class="ghost" id="reset" style="margin-top:8px">Przywróć domyślne</button>
+    </form>
+
+    <div class="panel figwrap">
+      <div class="fig" id="figbox"><svg id="draw" aria-label="Widok z przodu szafy"></svg></div>
+      <div class="stats" id="stats"></div>
+      <p class="err" id="err" hidden></p>
+      <p class="costl" id="cost"></p>
+    </div>
+  </div>
+</div>
+
+<div class="band">
+  <h2>Lista formatek</h2>
+  <div class="btns"><button type="button" id="copy">Kopiuj listę (do Excela)</button><span class="note" id="copied" aria-live="polite" style="align-self:center"></span></div>
+  <div class="panel"><table class="stack" id="tab"></table>
+  <p class="note">Długość = kierunek słoi. Formatki skośne (fronty, blendy, plecy) podane jako trapez: szerokość i dwie wysokości.</p></div>
+  <div class="panel" id="cut" style="margin-top:16px"></div>
+  <div class="panel" id="strip" style="margin-top:16px" hidden></div>
+  <div class="panel" id="frd" style="margin-top:16px" hidden></div>
+</div>
+
+<div class="band">
+  <h2>Rozkrój na arkusze</h2>
+  <p class="note" style="margin-top:-6px">Rozkrój orientacyjny, pasami (cięcia gilotynowe). Trapezy liczone jako prostokąt, w który się mieszczą. Numery = pozycje z listy.</p>
+  <div class="sheets" id="sheets"></div>
+</div>
+
+<script>
+{
+const ids=['W','D','H','Hk','low','luz','flat','Wp','sfP','bD','bp','bpH','bpMat','t','cok','n','pol','pcof','plecy','bokiFr','cP','cF','cH','cO','bLon','bL','bRon','bR','fr','szc','fmax','SL','SW','kerf','trim','grain'];
+const $=id=>document.getElementById(id);
+const defaults={};ids.forEach(i=>{const e=$(i);defaults[i]=e.type==='checkbox'?e.checked:e.value});
+const KEY='meblomen-skos-v6';let secVals=[],secFr=[];
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null');if(s&&Array.isArray(s.secw))secVals=s.secw;if(s&&Array.isArray(s.secfr))secFr=s.secfr;if(s)ids.forEach(i=>{if(s[i]!==undefined){const e=$(i);if(e.type==='checkbox')e.checked=s[i];else e.value=s[i]}})}catch(e){}
+const val=i=>{const e=$(i);return e.type==='checkbox'?e.checked:(e.tagName==='SELECT'?e.value:parseFloat(e.value)||0)};
+const r1=x=>Math.round(x*10)/10;
+const fmt=x=>{const v=r1(x);return Number.isInteger(v)?String(v):v.toFixed(1).replace('.',',')};
+let parts=[],lastP=null;
+function buildSec(){
+  const n=Math.max(1,Math.min(12,Math.round(val('n'))||1)),box=$('secw');
+  const cur=[...box.querySelectorAll('input')].map(e=>e.value);if(cur.length)secVals=cur;
+  const fb=$('secf');const curF=[...fb.querySelectorAll('select')].map(e=>e.value);if(curF.length)secFr=curF;
+  $('sfPl').hidden=!$('flat').checked;
+  if(box.children.length===n&&fb.children.length===n)return;
+  const opt=v=>['auto','1','2'].map(o=>`<option value="${o}"${o===v?' selected':''}>${o==='auto'?'auto':o==='1'?'1 front':'2 fronty'}</option>`).join('');
+  box.innerHTML=Array.from({length:n},(_,i)=>`<label>Sekcja ${i+1}<input type="number" id="sw${i}" min="100" step="1" placeholder="auto" value="${secVals[i]??''}"></label>`).join('');
+  fb.innerHTML=Array.from({length:n},(_,i)=>`<label>Sekcja ${i+1}<select id="sf${i}">${opt(secFr[i]||'1')}</select></label>`).join('');
+}
+
+function calc(){
+  const p={};ids.forEach(i=>p[i]=val(i));
+  const {W,D,H,Hk,luz,t,cok,szc,fmax}=p;const n=Math.max(1,Math.round(p.n)),pol=Math.max(0,Math.round(p.pol));
+  const mir=p.low==='L';
+  const flat=p.flat,Wp=flat?p.Wp:0,xA=-Wp;       // x = 0 w miejscu, gdzie zaczyna się skos
+  const bL=p.bLon?p.bL:0,bR=p.bRon?p.bR:0;
+  const bT=mir?bR:bL,bN=mir?bL:bR;               // blenda przy wysokiej / niskiej ścianie
+  const xs=xA+bT,xe=W-bN;
+  const err=[];
+  if(H<=Hk)err.push('Wysokość musi być większa niż ścianka kolankowa.');
+  if(flat&&Wp-bT<2*t+150)err.push('Część prosta za wąska (min. ok. '+fmt(2*t+150+bT)+' mm).');
+  const skStart=flat?0:xs+t;
+  const Wi=xe-t-skStart-(n-1)*t;
+  const raw=Array.from({length:n},(_,i)=>{const e=$('sw'+i);const v=e?parseFloat(e.value):NaN;return v>0?v:null});
+  const fixed=raw.reduce((a,v)=>a+(v||0),0),nAuto=raw.filter(v=>v===null).length;
+  const auto=nAuto?(Wi-fixed)/nAuto:0;
+  let wl=raw.map(v=>v===null?auto:v);
+  const gEnd=(isTall)=>(isTall?bT:bN)>0?szc:0;      // szczelina przy blendzie, bez blendy front równo z bokiem
+  let eqDoors=false;
+  if(p.fr&&nAuto===n){                             // sekcje auto → dobierz je tak, żeby wszystkie fronty były równe
+    const ks=Array.from({length:n},(_,i)=>{const no=mir?n-i:i+1;const ch=($('sf'+(no-1))||{}).value;return ch==='1'?1:ch==='2'?2:Math.max(1,Math.ceil((Wi/n+t)/fmax))});
+    const a0=flat?-t/2:xs,b0=xe,g0=flat?szc/2:gEnd(true),g1=gEnd(false),N=ks.reduce((a,b)=>a+b,0);
+    const wd=(b0-a0-g0-g1-(N-1)*szc)/N;
+    const cen=[];let K=0;for(let i=0;i<n-1;i++){K+=ks[i];cen.push(a0+g0+K*(wd+szc)-szc/2)}
+    const edges=[skStart,...cen.flatMap(d=>[d-t/2,d+t/2]),xe-t];
+    const wx=[];for(let i=0;i<n;i++)wx.push(edges[2*i+1]-edges[2*i]);
+    wl=mir?wx.reverse():wx;eqDoors=true;
+  }
+  if(nAuto===0&&Math.abs(fixed-Wi)>0.5)err.push(`Suma sekcji ${fmt(fixed)} mm, a pod skosem jest ${fmt(Wi)} mm (różnica ${fmt(Wi-fixed)}). Zostaw jedno pole puste albo popraw wymiary.`);
+  if(wl.some(v=>v<100))err.push('Któraś sekcja wychodzi węższa niż 100 mm.');
+  if(Hk-luz<cok+2*t+100)err.push('Ścianka kolankowa za niska dla cokołu i wieńców.');
+  const tanA=(H-Hk)/W,A=Math.atan(tanA),cosA=Math.cos(A),deg=A*180/Math.PI;
+  const hB=p.bp?p.bpH:0;
+  if(p.bp&&hB<20)err.push('Blenda pozioma za wąska.');
+  if(err.length)return{err};
+  const widths=mir?[...wl].reverse():wl;
+  const C=x=>x<0?H:H-x*tanA;                     // sufit
+  const c=x=>C(x)-luz;                           // wierzch korpusu
+  const u=(sc,x)=>sc.flat?c(x)-t:c(x)-t/cosA;    // spód wieńca górnego
+  const hBv=hB/cosA;                              // pionowy przekrój skośnej blendy = wys. blendy części prostej
+  const stripB=x=>!hB?c(x):c(x)-hBv; // dolna krawędź blendy poziomej
+  const y0=cok+t;
+  const P=[];
+  const add=(name,qty,len,wid,mat,band,extra)=>P.push(Object.assign({name,qty,len,wid,mat,band},extra||{}));
+  const tallName=mir?'prawy':'lewy',lowName=mir?'lewy':'prawy';
+  const secs=[];
+  if(flat)secs.push({xl:xs+t,xr:-t,w:-t-(xs+t),flat:true,no:'P'});
+  let x=skStart;widths.forEach((w,i)=>{secs.push({xl:x,xr:x+w,w,flat:false,no:mir?n-i:i+1});x+=w+t});
+  const ord=a=>[...a].sort((p1,p2)=>mir?p2.xl-p1.xl:p1.xl-p2.xl);
+  const divs=[];
+  for(let i=1;i<secs.length;i++){const xl=secs[i-1].xr,xr=secs[i].xl;divs.push({xl,xr,h:c(xr)-cok,full:secs[i-1].flat})}
+  const bokMat=p.bokiFr?'Front':'Płyta';
+  add(`Bok ${tallName} (wysoki)`,1,c(xs+t)-cok,D,bokMat,'1× dł. (przód)',{note:'stoi na cokole'});
+  add(`Bok ${lowName} (niski)`,1,c(xe)-cok,D,bokMat,'1× dł. (przód)',{note:'stoi na cokole, góra pozioma'});
+  let dn=0;ord(divs).forEach(d=>{if(d.full)add('Przegroda pełna (przy części prostej)',1,d.h,D,'Płyta','1× dł. (przód)',{note:'pełna wysokość, skos zaczyna się za nią'});
+    else add('Przegroda '+(++dn),1,d.h,D,'Płyta','1× dł. (przód)',{note:`stoi na cokole, góra pozioma (uskok ${fmt(t*tanA)} mm)`})});
+  const nm=sc=>sc.flat?'część prosta':'sekcja '+sc.no;
+  ord(secs).forEach(sc=>add('Wieniec dolny '+nm(sc),1,sc.w,D,'Płyta','1× dł. (przód)',{note:'między bokami / przegrodami'}));
+  ord(secs).forEach(sc=>{if(sc.flat){add('Wieniec górny część prosta',1,sc.w,D,'Płyta','1× dł. (przód)',{note:'prosty, 90°'});return}
+    const edge=sc.w/cosA,blank=edge+t*tanA;
+    add('Wieniec górny (skos) '+nm(sc),1,blank,D,'Płyta','1× dł. (przód)',{skos:{edge,blank},note:`formatka ${fmt(blank)}, piła ${fmt(deg)}°, końce równolegle → krawędzie po ${fmt(edge)}`})});
+  const shelves=[];
+  ord(secs).forEach(sc=>{const hmin=u(sc,sc.xr)-y0;const k=Math.min(pol,Math.max(0,Math.floor(hmin/220)-1));sc.k=k;
+    for(let j=1;j<=k;j++)shelves.push({x1:sc.xl,x2:sc.xr,y:y0+hmin*j/(k+1)});
+    if(k)add('Półka '+nm(sc),k,sc.w,D-p.pcof,'Płyta','1× dł. (przód)')});
+  if(cok>0)add('Blenda cokołu',1,xe-xs,cok,'Płyta','—');
+  if(p.plecy)ord(secs).forEach(sc=>{const w=sc.w+2*t-3,hL=c(sc.xl)-cok-3,hR=c(sc.xr+t)-cok-3;
+    add('Plecy '+nm(sc),1,Math.max(hL,hR),w,'HDF 3','—',sc.flat?{note:'prostokąt'}:{trap:[hL,hR],note:`wys. ${fmt(mir?hR:hL)} / ${fmt(mir?hL:hR)} (lewa / prawa), góra skośna`})});
+  const blends=[];
+  if(bT>0)blends.push({x1:xA,x2:xs,name:`Blenda ${mir?'prawa':'lewa'} (przy wysokiej ścianie)`});
+  if(bN>0)blends.push({x1:xe,x2:W,name:`Blenda ${mir?'lewa':'prawa'} (przy niskiej ścianie)`});
+  blends.forEach(b=>{b.h1=c(b.x1);b.h2=c(b.x2);const sk=b.h1!==b.h2;
+    add(b.name,1,Math.max(b.h1,b.h2),b.x2-b.x1,'Front',sk?'2× dł. + skos':'2× dł.',{trap:[b.h1,b.h2],note:sk?`wys. ${fmt(b.h1)} / ${fmt(b.h2)}, góra pod kątem ${fmt(deg)}°`:'prostokąt'});
+    if(p.bD>0){const wx=b.x1===xA?xA:W;add(b.name.replace('Blenda','Blenda boczna — listwa głęb.'),1,c(wx),p.bD,'Front','1× dł. (przód)',{note:'prostokąt, przy ścianie za blendą (L)'})}});
+  const strips=[];let stripInfo=null;
+  if(hB){
+    const sx1=flat?0:xs,S=xe-sx1,edge=S/cosA,blank=edge+hB*tanA;
+    strips.push({pts:[[sx1,c(sx1)],[xe,c(xe)],[xe,stripB(xe)],[sx1,stripB(sx1)]]});stripInfo={edge,blank,hB,hBv,S,flatLen:flat?-xs:0,mat:p.bpMat};
+    add('Blenda pozioma nad frontami (skos)',1,blank,hB,p.bpMat,'1× dł. (dół)',{note:`formatka ${fmt(blank)} × ${fmt(hB)}; końce cięte pod kątem ${fmt(deg)}° w płaszczyźnie płyty (równolegle) → krawędzie po ${fmt(edge)}`});
+    if(flat){strips.push({pts:[[xs,c(xs)],[0,c(0)],[0,c(0)-hBv],[xs,c(xs)-hBv]]});
+      add('Blenda pozioma nad frontami (część prosta)',1,-xs,hBv,p.bpMat,'1× dł. (dół)',{note:`wysokość ${fmt(hBv)} = przekrój pionowy blendy skośnej (${fmt(hB)} ÷ cos ${fmt(deg)}°), dół równo ze skośną`})}
+  }
+  const fronts=[];
+  if(p.fr){
+    const all=secs;const bounds=[xs];for(let i=1;i<all.length;i++)bounds.push((divs[i-1].xl+divs[i-1].xr)/2);bounds.push(xe);
+    const topF=x=>hB?stripB(x)-szc:c(x);          // pod blendą górną zostaje szczelina, blenda bez zmian
+    all.forEach((sc,i)=>{const a=bounds[i],b=bounds[i+1];const ch=sc.flat?p.sfP:($('sf'+(sc.no-1))||{}).value;const cnt=ch==='1'?1:ch==='2'?2:Math.max(1,Math.ceil((b-a)/fmax));
+      const ga=i===0?gEnd(true):szc/2,gb=i===all.length-1?gEnd(false):szc/2;const w=(b-a-ga-gb-(cnt-1)*szc)/cnt;
+      for(let j=0;j<cnt;j++){const x1=a+ga+j*(w+szc),x2=x1+w,yb=cok;   // dół frontu = dolna krawędź wieńca dolnego
+        fronts.push({x1,x2,yb,h1:topF(x1)-yb,h2:topF(x2)-yb,sc,key:mir?-x2:x1})}});
+    fronts.sort((a,b)=>a.key-b.key).forEach((f,i)=>{const L=mir?f.h2:f.h1,R=mir?f.h1:f.h2;
+      f.no=i+1;f.L=L;f.R=R;add(`Front ${i+1} (${nm(f.sc)})`,1,Math.max(f.h1,f.h2),f.x2-f.x1,'Front','4× dookoła',{trap:[f.h1,f.h2],note:Math.abs(L-R)<0.05?'prostokąt':`wys. ${fmt(L)} / ${fmt(R)} (lewa / prawa)`})});
+  }
+  let band=0;P.forEach(q=>{const sl=q.trap?Math.hypot(q.wid,q.trap[0]-q.trap[1]):0;
+    if(q.band.startsWith('1×'))band+=q.len*q.qty;
+    else if(q.band.startsWith('4×'))band+=(q.trap[0]+q.trap[1]+q.wid+sl)*q.qty;
+    else if(q.band.startsWith('2×'))band+=(q.trap[0]+q.trap[1]+(q.band.includes('skos')?sl:0))*q.qty});
+  P.forEach((q,i)=>q.no=i+1);
+  return{p,P,eqDoors,secs,divs,shelves,fronts,blends,strips,stripInfo,deg,c,u,y0,band,n,xs,xe,xA,tanA,flat,Wp};
+}
+
+function drawFig(R){
+  const sv=$('draw'),box=$('figbox');const Wpx=box.clientWidth,Hpx=box.clientHeight;
+  if(!R||R.err){sv.innerHTML='';return}
+  const {p,c,u,y0,divs,shelves,fronts,secs,blends,strips,xs,xe,xA,flat,Wp}=R;const {W,H,Hk,t,cok}=p;
+  const WT=W-xA,pad=Wpx<520?34:56,sc=Math.min((Wpx-pad*2)/WT,(Hpx-pad*1.6)/H);
+  const ox=(Wpx-WT*sc)/2,oy=Hpx-pad*0.9;
+  const mir=p.low==='L';
+  const X=x=>ox+(mir?W-x:x-xA)*sc,Y=y=>oy-y*sc;
+  const poly=(pts,st)=>`<polygon points="${pts.map(q=>X(q[0]).toFixed(1)+','+Y(q[1]).toFixed(1)).join(' ')}" ${st}/>`;
+  const oakS='fill="var(--oak2)" stroke="var(--ink)" stroke-width="1.2"',frS='fill="var(--front)" stroke="var(--ink)" stroke-width="1.2"';
+  let g='';
+  const e=WT*0.03,tA=(H-Hk)/W;
+  g+=`<polyline points="${[[xA-e,H],[0,H],[W+e,Hk-e*tA]].map(q=>X(q[0])+','+Y(q[1])).join(' ')}" fill="none" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+  g+=`<line x1="${X(xA-e)}" y1="${Y(0)}" x2="${X(W+e)}" y2="${Y(0)}" stroke="var(--mute)" stroke-width="1.5"/>`;
+  const sideS=p.bokiFr?frS:oakS;
+  g+=poly([[xs,cok],[xs+t,cok],[xs+t,c(xs+t)],[xs,c(xs+t)]],sideS);
+  g+=poly([[xe-t,cok],[xe,cok],[xe,c(xe)],[xe-t,c(xe)]],sideS);
+  secs.forEach(s=>{g+=poly([[s.xl,cok],[s.xr,cok],[s.xr,y0],[s.xl,y0]],oakS);g+=poly([[s.xl,c(s.xl)],[s.xr,c(s.xr)],[s.xr,u(s,s.xr)],[s.xl,u(s,s.xl)]],oakS)});
+  if(cok>0)g+=poly([[xs+10,0],[xe-10,0],[xe-10,cok-0.1],[xs+10,cok-0.1]],'fill="none" stroke="var(--mute)" stroke-width="1" stroke-dasharray="3 3"');
+  divs.forEach(d=>g+=poly([[d.xl,cok],[d.xr,cok],[d.xr,cok+d.h],[d.xl,cok+d.h]],oakS));
+  shelves.forEach(s=>g+=poly([[s.x1,s.y-t/2],[s.x2,s.y-t/2],[s.x2,s.y+t/2],[s.x1,s.y+t/2]],'fill="var(--oak)" stroke="var(--ink)" stroke-width="0.8"'));
+  blends.forEach(b=>g+=poly([[b.x1,0],[b.x2,0],[b.x2,b.h2],[b.x1,b.h1]],frS));
+  strips.forEach(s=>g+=poly(s.pts,p.bpMat==='Front'?frS:'fill="var(--oak)" stroke="var(--ink)" stroke-width="1.2"'));
+  fronts.forEach(f=>g+=poly([[f.x1,f.yb],[f.x2,f.yb],[f.x2,f.yb+f.h2],[f.x1,f.yb+f.h1]],'fill="none" stroke="#2f7d9c" stroke-width="1" stroke-dasharray="2 3"'));
+  const fs=Wpx<520?11:13;
+  const txt=(x,y,s,anchor,rot)=>`<text x="${x}" y="${y}" font-size="${fs}" font-family="Barlow" font-weight="600" fill="var(--ink)" text-anchor="${anchor||'middle'}" paint-order="stroke" stroke="var(--card)" stroke-width="4" ${rot?`transform="rotate(-90 ${x} ${y})"`:''}>${s}</text>`;
+  const by=Y(0)+fs+8,dim=(a,b,l)=>`<line x1="${X(a)}" y1="${by-fs/2-2}" x2="${X(b)}" y2="${by-fs/2-2}" stroke="var(--ink)" stroke-width="0.8"/><line x1="${X(b)}" y1="${by-fs}" x2="${X(b)}" y2="${by}" stroke="var(--ink)" stroke-width="0.8"/>`+txt((X(a)+X(b))/2,by+4,l);
+  g+=dim(0,W,(flat?'skos ':'szer. ')+fmt(W));if(flat)g+=dim(xA,0,'prosta '+fmt(Wp));
+  const xt=X(xA)+(mir?14:-14),xlo=X(W)+(mir?-14:14);
+  g+=txt(xt,(Y(0)+Y(H))/2,'wys. '+fmt(H),'middle',1)+txt(xlo,(Y(0)+Y(Hk))/2,'kolank. '+fmt(Hk),'middle',1);
+  secs.forEach(s=>g+=txt((X(s.xl)+X(s.xr))/2,Y(y0)-6,s.flat?'P':'S'+s.no)+(Math.abs(X(s.xr)-X(s.xl))>34?txt((X(s.xl)+X(s.xr))/2,Y(y0)-6-fs-4,fmt(s.w)):''));
+  g+=txt(X(W*0.55),Y(H-W*0.55*tA)-14,`skos ${fmt(R.deg)}°`);
+  sv.setAttribute('viewBox',`0 0 ${Wpx} ${Hpx}`);sv.innerHTML=g;
+}
+
+function nest(items,p,rot){
+  const SL=p.SL-2*p.trim,SW=p.SW-2*p.trim,k=p.kerf;
+  const list=[];items.forEach(q=>{for(let i=0;i<q.qty;i++){let a=q.len,b=q.wid;// a wzdłuż słoi = wzdłuż arkusza
+    if(rot&&(a<b||a>SL)&&b<=SL&&a<=SW)[a,b]=[b,a];list.push({no:q.no,a,b,bad:a>SL||b>SW})}});
+  const bad=list.filter(x=>x.bad),ok=list.filter(x=>!x.bad);
+  const orders=[(x,y)=>y.b-x.b||y.a-x.a,(x,y)=>y.a-x.a||y.b-x.b,(x,y)=>y.a*y.b-x.a*x.b];
+  let best=null;
+  orders.forEach(ord=>{
+    const sheets=[];
+    [...ok].sort(ord).forEach(it=>{
+      let bs=null,bl=Infinity;
+      sheets.forEach(sh=>sh.strips.forEach(st=>{const left=SL-st.x-it.a;if(it.b<=st.h&&left>=0){const w=left+(st.h-it.b)*0.5;if(w<bl){bl=w;bs={sh,st}}}}));
+      if(bs){bs.sh.pcs.push({...it,x:bs.st.x,y:bs.st.y});bs.st.x+=it.a+k;return}
+      let sh=sheets.find(s=>s.y+it.b<=SW);
+      if(!sh){sh={strips:[],pcs:[],y:0};sheets.push(sh)}
+      sh.strips.push({y:sh.y,h:it.b,x:it.a+k});sh.pcs.push({...it,x:0,y:sh.y});sh.y+=it.b+k;
+    });
+    const last=sheets.length?sheets[sheets.length-1].y:0;
+    if(!best||sheets.length<best.sheets.length||(sheets.length===best.sheets.length&&last<best.last))best={sheets,last};
+  });
+  return{sheets:best.sheets,bad};
+}
+
+function render(){
+  buildSec();const R=calc();lastP=R;
+  try{const s={secw:[...$('secw').querySelectorAll('input')].map(e=>e.value),secfr:[...$('secf').querySelectorAll('select')].map(e=>e.value)};ids.forEach(i=>{const e=$(i);s[i]=e.type==='checkbox'?e.checked:e.value});localStorage.setItem(KEY,JSON.stringify(s))}catch(e){}
+  const er=$('err');
+  if(R.err){er.hidden=false;er.textContent=R.err.join(' ');$('tab').innerHTML='';$('sheets').innerHTML='';$('stats').innerHTML='';$('cut').innerHTML='';$('cost').innerHTML='';$('strip').hidden=true;$('frd').hidden=true;drawFig(null);return}
+  er.hidden=true;parts=R.P;
+  const rows=R.P.map(q=>`<tr><td><span class="tag">${q.no}</span></td><td>${q.name}${q.note?`<div class="note">${q.note}</div>`:''}</td><td class="n">${q.qty}</td><td class="n">${fmt(q.len)}</td><td class="n">${fmt(q.wid)}</td><td>${q.mat}</td><td>${q.band}</td></tr>`).join('');
+  $('tab').innerHTML=`<thead><tr><th>Nr</th><th>Element</th><th class="n">Szt.</th><th class="n">Długość</th><th class="n">Szerokość</th><th>Materiał</th><th>Oklejanie</th></tr></thead><tbody>${rows}</tbody>`;
+  const mats=[...new Set(R.P.map(q=>q.mat))];
+  let html='',tot={};
+  mats.forEach(m=>{const N=nest(R.P.filter(q=>q.mat===m),R.p,m==='HDF 3'||!R.p.grain);tot[m]=N.sheets.length;
+    const area=R.P.filter(q=>q.mat===m).reduce((a,q)=>a+q.len*q.wid*q.qty,0),use=area/(N.sheets.length*R.p.SL*R.p.SW||1);
+    if(N.bad.length)html+=`<p class="err">${m}: formatki nr ${[...new Set(N.bad.map(b=>b.no))].join(', ')} nie mieszczą się na arkuszu${R.p.grain?' (spróbuj wyłączyć słoje)':''}.</p>`;
+    N.sheets.forEach((sh,si)=>{
+      const vb=`0 0 ${R.p.SL} ${R.p.SW}`,tr=R.p.trim;
+      const fill=m==='HDF 3'?'var(--hdf)':m==='Front'?'var(--front)':'var(--oak2)';
+      const pcs=sh.pcs.map(c=>{const fsz=Math.min(90,c.b*0.45,c.a*0.3);return `<rect x="${c.x+tr}" y="${c.y+tr}" width="${c.a}" height="${c.b}" fill="${fill}" stroke="var(--ink)" stroke-width="3"/>`+(fsz>=28?`<text x="${c.x+tr+c.a/2}" y="${c.y+tr+c.b/2}" font-size="${fsz}" font-family="Barlow" font-weight="600" fill="var(--ink)" text-anchor="middle" dominant-baseline="central">${c.no}${c.a>fsz*7?` · ${fmt(c.a)}×${fmt(c.b)}`:''}</text>`:'')}).join('');
+      html+=`<div class="sheet panel"><h3>${m} — arkusz ${si+1} z ${N.sheets.length}${si===0?` · wykorzystanie ${Math.round(use*100)}%`:''}</h3><svg viewBox="${vb}" role="img" aria-label="${m} arkusz ${si+1}"><rect width="${R.p.SL}" height="${R.p.SW}" fill="var(--bg)" stroke="var(--mute)" stroke-width="4" stroke-dasharray="20 14"/>${pcs}</svg></div>`});
+  });
+  $('sheets').innerHTML=html;
+  const sk=R.fronts.filter(f=>Math.abs(f.L-f.R)>0.05),fd=$('frd');fd.hidden=!sk.length;
+  if(sk.length){
+    const dg=fmt(R.deg),dIn=fmt(90-R.deg),dOut=fmt(90+R.deg);
+    const card=f=>{const w=f.x2-f.x1,hm=Math.max(f.L,f.R),bw=250,bh=270,k=Math.min((bw-90)/w,(bh-70)/hm);
+      const W2=w*k,L=f.L*k,Rr=f.R*k,x0=(bw-W2)/2,yb=bh-30;
+      const pts=[[x0,yb],[x0+W2,yb],[x0+W2,yb-Rr],[x0,yb-L]];
+      const T=(x,y,t,a,col,rot)=>`<text x="${x}" y="${y}" font-size="13" font-family="Barlow" font-weight="600" fill="${col||'var(--ink)'}" text-anchor="${a||'middle'}" ${rot?`transform="rotate(-90 ${x} ${y})"`:''}>${t}</text>`;
+      const top=Math.hypot(w,f.L-f.R),hi=f.L>f.R;
+      return `<div class="sheet"><h3>Front ${f.no} · ${f.sc.flat?'część prosta':'sekcja '+f.sc.no}</h3><svg viewBox="0 0 ${bw} ${bh}" style="max-width:300px" aria-label="Front ${f.no}"><polygon points="${pts.map(q=>q.join(',')).join(' ')}" fill="var(--front)" stroke="var(--ink)" stroke-width="2"/>`+
+        T(x0+W2/2,yb+18,fmt(w))+T(x0-10,yb-L/2,fmt(f.L),'middle','',1)+T(x0+W2+18,yb-Rr/2,fmt(f.R),'middle','',1)+
+        T(x0+W2/2,yb-Math.max(L,Rr)-12,'skos '+fmt(top))+T(hi?x0+6:x0+W2-6,yb-(hi?L:Rr)+42,dIn+'°',hi?'start':'end','var(--red)')+T(hi?x0+W2-6:x0+6,yb-(hi?Rr:L)+20,dOut+'°',hi?'end':'start','var(--red)')+`</svg></div>`};
+    fd.innerHTML=`<h2 style="font-size:24px">Rysunki frontów skośnych</h2><p class="note" style="margin:-4px 0 12px">Widok od przodu, w skali. Góra cięta pod kątem ${dg}° od prostopadłej (narożniki ${dIn}° i ${dOut}°). Fronty prostokątne są w rozkroju jako całe prostokąty.</p><div class="sheets" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,240px),1fr))">${sk.map(card).join('')}</div>`;
+  }
+  const si=R.stripInfo,sb=$('strip');sb.hidden=!si;
+  if(si){
+    const dg=fmt(R.deg),dk=fmt(90-R.deg),tA=Math.tan(R.deg*Math.PI/180);
+    const L=470,h=74,o=h*tA,x0=40,y0=40,tot=L+o;
+    const T=(x,y,t,a,col)=>`<text x="${x}" y="${y}" font-size="14" font-family="Barlow" font-weight="600" fill="${col||'var(--ink)'}" text-anchor="${a||'middle'}">${t}</text>`;
+    const ln=(x1,y1,x2,y2,d)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--ink)" stroke-width="1" ${d?'stroke-dasharray="4 4"':''}/>`;
+    const tick=(x,y)=>ln(x,y-6,x,y+6);
+    const fill=si.mat==='Front'?'var(--front)':'var(--oak)';
+    // romboid: góra przesunięta w stronę wysokiej ściany
+    const A=[x0,y0],B=[x0+L,y0],Cc=[x0+L+o,y0+h],Dd=[x0+o,y0+h];
+    let g=`<polygon points="${[A,B,Cc,Dd].map(q=>q.join(',')).join(' ')}" fill="${fill}" stroke="var(--ink)" stroke-width="2"/>`;
+    g+=ln(x0,y0+h,x0,y0+h+40,1)+ln(x0+tot,y0+h,x0+tot,y0+h+40,1)+ln(x0,y0+h+30,x0+tot,y0+h+30)+tick(x0,y0+h+30)+tick(x0+tot,y0+h+30)+T(x0+tot/2,y0+h+50,'formatka wyjściowa '+fmt(si.blank));
+    g+=ln(x0,y0-18,x0+L,y0-18)+tick(x0,y0-18)+tick(x0+L,y0-18)+T(x0+L/2,y0-24,'krawędź górna (pod sufitem) '+fmt(si.edge));
+    g+=T(x0+o+L/2,y0+h-12,'krawędź dolna (nad frontami) '+fmt(si.edge));
+    g+=ln(x0+tot+14,y0,x0+tot+14,y0+h)+`<line x1="${x0+L}" y1="${y0}" x2="${x0+tot+20}" y2="${y0}" stroke="var(--ink)" stroke-width="1" stroke-dasharray="3 3"/>`+tick(x0+tot+14,y0)+tick(x0+tot+14,y0+h);
+    g+=`<text x="${x0+tot+30}" y="${y0+h/2+5}" font-size="14" font-family="Barlow" font-weight="600" fill="var(--ink)">${fmt(si.hB)}</text>`;
+    g+=ln(x0,y0,x0,y0+h,1)+T(x0+o/2+16,y0+h-6,dg+'°','start','var(--red)')+ln(x0+L,y0,x0+L,y0+h,1)+T(x0+L-8,y0+18,dg+'°','end','var(--red)');
+    let flatSvg='';
+    if(si.flatLen){const fl=200;flatSvg=`<svg viewBox="0 0 340 120" style="width:100%;max-width:330px;height:auto;display:block" aria-label="Blenda pozioma, część prosta"><rect x="20" y="30" width="${fl}" height="${h*0.6}" fill="${fill}" stroke="var(--ink)" stroke-width="2"/>${ln(20,95,20+fl,95)}${tick(20,95)}${tick(20+fl,95)}${T(20+fl/2,114,fmt(si.flatLen))}${T(20+fl/2,22,'część prosta')}${T(20+fl+34,30+h*0.3+5,fmt(si.hBv))}</svg>`}
+    sb.innerHTML=`<h2 style="font-size:24px">Rysunek techniczny — blenda pozioma nad frontami</h2>
+    <p class="note" style="margin:-4px 0 8px">Widok od przodu, ułożona poziomo. Grubość narysowana większa dla czytelności, kąty prawdziwe. Materiał: ${si.mat==='Front'?'jak fronty':'jak korpus'}.</p>
+    <div class="scroll"><svg viewBox="0 0 ${x0+tot+80} ${y0+h+64}" style="width:100%;min-width:480px;max-width:${x0+tot+80}px;height:auto;display:block" aria-label="Rysunek blendy poziomej">${g}</svg></div>
+    ${flatSvg}
+    <ol style="margin:10px 0 0;padding-left:20px">
+      <li>Wytnij pas <b>${fmt(si.blank)} × ${fmt(si.hB)}</b>.</li>
+      <li>Oba końce tnij <b>w płaszczyźnie płyty</b> (piła prosto, 90°), z kątownikiem lub prowadnicą ustawioną na <b>${dg}°</b> od prostopadłej (czyli ${dk}° do krawędzi).</li>
+      <li>Końce równolegle do siebie — wychodzi romboid. Górna i dolna krawędź mają po <b>${fmt(si.edge)}</b>.</li>
+      <li>Po zamontowaniu końce stoją pionowo, a blenda biegnie równo ze skosem. Okleja się dolną krawędź.</li>
+      ${si.flatLen?`<li>Część prosta: pas <b>${fmt(si.flatLen)} × ${fmt(si.hBv)}</b>. Wysokość z przekroju pionowego blendy skośnej: ${fmt(si.hB)} ÷ cos ${dg}° = ${fmt(si.hBv)}, dzięki temu dolne krawędzie schodzą się równo.</li>`:''}
+    </ol>`;
+  }
+  const tops=R.P.filter(q=>q.skos);const t=R.p.t,dg=fmt(R.deg),k90=fmt(90-R.deg);
+  $('cut').innerHTML=`<h2 style="font-size:24px">Jak dociąć wieńce górne (skosy)</h2>
+  <svg viewBox="0 0 520 150" style="width:100%;max-width:520px;height:auto;display:block;margin:4px 0 10px" aria-label="Przekrój wieńca górnego"><polygon points="40,110 420,110 470,40 90,40" fill="var(--oak2)" stroke="var(--ink)" stroke-width="2"/><line x1="90" y1="40" x2="90" y2="110" stroke="var(--red)" stroke-dasharray="4 4"/><line x1="420" y1="110" x2="420" y2="40" stroke="var(--red)" stroke-dasharray="4 4"/><text x="255" y="30" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="Barlow" font-weight="600">krawędź górna = dolna</text><text x="255" y="135" text-anchor="middle" font-size="14" fill="var(--ink)" font-family="Barlow" font-weight="600">formatka wyjściowa (najdłuższy wymiar)</text><text x="64" y="80" text-anchor="middle" font-size="14" fill="var(--red)" font-family="Barlow" font-weight="600">${dg}°</text><text x="446" y="80" text-anchor="middle" font-size="14" fill="var(--red)" font-family="Barlow" font-weight="600">${dg}°</text></svg>
+  <ol style="margin:0;padding-left:20px">
+   <li>Wytnij formatkę prostokątną na długość wyjściową (tabela poniżej) × głębokość ${fmt(R.p.D)}.</li>
+   <li>Pochyl piłę o <b>${dg}°</b> (czyli cięcie ${k90}° do powierzchni płyty).</li>
+   <li>Zetnij oba końce <b>równolegle</b> — ta sama strona płyty do góry, piła pochylona w tę samą stronę. Wychodzi romboid, nie trapez.</li>
+   <li>Sprawdź: górna i dolna krawędź mają tę samą długość. Po montażu ścięte końce stoją pionowo przy bokach i przegrodach.</li>
+  </ol>
+  <table class="stack" style="margin-top:12px"><thead><tr><th>Element</th><th class="n">Formatka wyjściowa</th><th class="n">Krawędź górna = dolna</th><th class="n">Głębokość</th><th class="n">Kąt piły</th></tr></thead><tbody>${tops.map(q=>`<tr><td>${q.name}</td><td class="n">${fmt(q.skos.blank)}</td><td class="n">${fmt(q.skos.edge)}</td><td class="n">${fmt(q.wid)}</td><td class="n">${dg}°</td></tr>`).join('')}</tbody></table>
+  <p class="note">Boki i przegrody mają poziomą górę. Wieniec górny wchodzi między nie, więc nad niższą stroną przegrody zostaje uskok ${fmt(t*R.tanA)} mm — schowa się pod blendą albo listwą.</p>`;
+  const pr={'Płyta':R.p.cP,'Front':R.p.cF,'HDF 3':R.p.cH};
+  const cost=Object.keys(tot).reduce((a,m)=>a+tot[m]*(pr[m]||0),0)+R.band/1000*1.1*R.p.cO;
+  const zl=v=>Math.round(v).toLocaleString('pl-PL')+' zł';
+  $('cost').innerHTML=cost>0?`<b>${zl(cost)}</b> koszt materiału · `+Object.keys(tot).filter(m=>pr[m]).map(m=>`${m.replace('HDF 3','HDF')}: ${tot[m]} × ${zl(pr[m])} = ${zl(tot[m]*pr[m])}`).join(' · ')+(R.p.cO?` · obrzeże ${fmt(R.band/1000*1.1)} mb (z 10% zapasu) = ${zl(R.band/1000*1.1*R.p.cO)}`:''):'Wpisz ceny arkuszy w panelu, żeby policzyć koszt materiału.';
+  const st=[[tot['Płyta']||0,'arkusze płyty'],...(tot['Front']?[[tot['Front'],'arkusze frontów']]:[]),...(tot['HDF 3']?[[tot['HDF 3'],'arkusze HDF']]:[]),[fmt(R.band/1000)+' m','obrzeże (bez zapasu)'],[R.P.reduce((a,q)=>a+q.qty,0),'formatek'],[fmt(R.deg)+'°','kąt skosu']];
+  $('stats').innerHTML=st.map(s=>`<div class="stat"><b>${s[0]}</b><span>${s[1]}</span></div>`).join('');
+  drawFig(R);
+}
+
+const ro=new ResizeObserver(()=>drawFig(lastP&&!lastP.err?lastP:null));ro.observe($('figbox'));
+$('f').addEventListener('input',render);$('f').addEventListener('change',render);
+$('f').addEventListener('submit',e=>e.preventDefault());
+$('reset').addEventListener('click',()=>{secVals=[];secFr=[];$('secw').innerHTML='';$('secf').innerHTML='';ids.forEach(i=>{const e=$(i);if(e.type==='checkbox')e.checked=defaults[i];else e.value=defaults[i]});render()});
+$('copy').addEventListener('click',async()=>{
+  const lines=['Nr\tElement\tSzt.\tDługość\tSzerokość\tMateriał\tOklejanie\tUwagi',...parts.map(q=>[q.no,q.name,q.qty,fmt(q.len),fmt(q.wid),q.mat,q.band,q.note||''].join('\t'))];
+  try{await navigator.clipboard.writeText(lines.join('\n'));$('copied').textContent='Skopiowano — wklej w Excelu.'}catch(e){$('copied').textContent='Nie udało się skopiować w tym oknie.'}
+});
+render();
+}
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
+</script>
+</body>
+</html>
