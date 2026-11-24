@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MebloMen – meble na wymiar</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Figtree:wght@400;600&display=swap">
+<style>
+/* VOICE: rzemieślnik, konkretnie i ciepło, bez przechwałek
+   IDEA: kuchnia z czarnego matu, dębu i lameli ze światłem LED
+   PICTURE: zdjęcie realizacji na całą szerokość + logo z lameli, które rosną i zapalają się
+   COLOUR and TYPE: antracyt, dąb, ciepły LED; Unbounded + Figtree
+   LAYOUT: menu na zdjęciu, potem O mnie, Realizacje (ciemny pas), Kontakt, stopka */
+:root{color-scheme:light dark;--k:url(img/k1.jpg);--bg:light-dark(#f4f2ee,#111213);--ink:light-dark(#17191a,#ecebe7);--mut:light-dark(#5d5f60,#a5a6a3);--card:light-dark(#fff,#1b1d1e);--bd:light-dark(#dcd8d0,#2c2f30);--oak:light-dark(#9c6a33,#d19a5a);--led:#f4bd55;--dk:#18191b}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 Figtree,system-ui,sans-serif;overflow-x:clip}
+h1,h2,h3{font-family:Unbounded,system-ui,sans-serif;font-weight:700;line-height:1.08;margin:0 0 .45em;text-wrap:balance}
+h2{font-size:clamp(30px,5vw,46px)}
+h3{font-size:19px;font-weight:500}
+a{color:inherit}
+.w{max-width:1140px;margin:0 auto;padding:0 max(5vw,18px)}
+.band{padding:clamp(56px,8vw,104px) 0}
+.top{position:fixed;top:12px;right:max(3vw,12px);z-index:20}
+.mb{width:52px;height:52px;border:0;border-radius:50%;background:rgba(18,19,20,.55);color:#fff;display:grid;place-items:center;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:background .3s}
+.top.on .mb{background:rgba(18,19,20,.88)}
+.drawer{position:fixed;inset:0;z-index:60;visibility:hidden;transition:visibility 0s .35s}
+.drawer.open{visibility:visible;transition-delay:0s}
+.dr-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);opacity:0;transition:opacity .3s}
+.drawer.open .dr-bg{opacity:1}
+.dr-p{position:absolute;inset:0 auto 0 0;width:min(88vw,420px);background:#18191b;color:#ecebe7;transform:translateX(-100%);transition:transform .35s ease;overflow-y:auto;display:flex;flex-direction:column}
+.drawer.open .dr-p{transform:none}
+.dr-h{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 18px 32px}
+.dr-h{align-items:flex-start;padding-top:22px}.dlogo{display:flex;flex-direction:column;align-items:center;gap:8px;font:700 22px Unbounded,sans-serif}
+.dlogo svg{width:150px;height:auto}
+.dr-x{display:grid;place-items:center;width:48px;height:48px;background:none;border:0;color:#fff;cursor:pointer}
+.mis{border-bottom:1px solid #34373a}
+.mi{display:block;padding:24px 32px;border-top:1px solid #34373a;font:400 17px Figtree,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#ecebe7;text-decoration:none;opacity:0;transform:translateX(-14px);transition:opacity .3s,transform .3s,color .2s}
+.drawer.open .mi{opacity:1;transform:none}
+.drawer.open .mi:nth-child(2){transition-delay:.05s}.drawer.open .mi:nth-child(3){transition-delay:.1s}.drawer.open .mi:nth-child(4){transition-delay:.15s}
+.mi:hover,.mi.on{color:var(--led)}
+.dr-p .btn{margin:34px 32px 12px;justify-content:center}
+.dr-mail{margin:0 32px 36px;color:#a9aaa6;font-size:15px;overflow-wrap:anywhere}
+.mb:focus-visible,.dr-x:focus-visible,.mi:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+.hero{position:relative;min-height:100svh;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;background:var(--dk);overflow:hidden}
+.hero:after{content:"";position:absolute;inset:0;background:var(--k) center 42%/cover;animation:zoom 30s ease-out both}
+.hero:before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(12,12,13,.7),rgba(12,12,13,.55) 45%,rgba(12,12,13,.9))}
+.hero .w{position:relative;z-index:2;width:100%;padding-top:110px;padding-bottom:70px}
+.logo{width:min(460px,88vw);height:auto;display:block;margin:0 auto 22px;overflow:visible}
+.hero p{margin-left:auto!important;margin-right:auto!important}.btns{justify-content:center}
+.hero p{max-width:470px;font-size:19px;margin:0 0 28px;color:#e7e3dc}
+.btns{display:flex;flex-wrap:wrap;gap:12px}
+.btn{display:inline-flex;align-items:center;min-height:48px;background:var(--led);color:#1a1206;border:0;border-radius:6px;padding:12px 24px;font:600 16px Figtree,sans-serif;text-decoration:none;cursor:pointer}
+.btn.o{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.7)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,nav a:focus-visible,.cp:focus-visible{outline:3px solid var(--led);outline-offset:2px}
+/* logo: szafka, ktorej drzwi sie otwieraja i odslaniaja swiecace M */
+.frame{fill:#141516;stroke:url(#oak);stroke-width:5}
+.door{fill:url(#oak);stroke:#6e461c;stroke-width:.8;transform-box:fill-box;animation:open 1.1s .5s cubic-bezier(.6,0,.2,1) both}
+.door.l{transform-origin:0 50%}.door.r{transform-origin:100% 50%}
+.knob{fill:#2a1a0b}
+.mled{fill:none;stroke:var(--led);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:190;stroke-dashoffset:190;filter:url(#glow);animation:draw 1s 1.3s ease-out forwards,pulse 3.5s 2.6s ease-in-out infinite}
+.shelf{stroke:#3a3c3f;stroke-width:2}
+.wm{font:700 32px Unbounded,sans-serif;fill:#fff}.wm tspan{animation:fade .5s both}
+.sub{font:500 9.5px Figtree,sans-serif;letter-spacing:.5px;fill:#d8cfc1;animation:fade .8s 2.6s both}
+/* szkic kuchni rysowany kreska, jak w Kasidomek */
+.sk .dr{fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:dr 2.4s ease forwards}
+.sk .w1{stroke:#fff;stroke-width:2.4}.sk .w2{stroke:#fff;stroke-width:1.4;opacity:.8}.sk .g{stroke:var(--led);stroke-width:2.6}
+.sk .fi{opacity:0;animation:fi 1.2s ease forwards}
+.sk .led{animation:fi 1s 2.2s ease forwards,pulse 4s 3.4s ease-in-out infinite}
+.sk .t1{font:700 46px Unbounded,sans-serif;fill:#fff;animation-delay:2.3s}
+.sk .t2{font:500 14px Figtree,sans-serif;letter-spacing:.14em;fill:#e7e3dc;animation-delay:2.7s}
+.sk .chip{fill:#f4d9a8;opacity:0;transform-box:fill-box;transform-origin:center;animation:chip 3.6s 3s ease-out infinite}
+@keyframes dr{to{stroke-dashoffset:0}}@keyframes fi{to{opacity:1}}
+@keyframes chip{0%{transform:translate(0,0) rotate(0) scale(.6);opacity:0}15%{opacity:.9}100%{transform:translate(-14px,34px) rotate(200deg) scale(1);opacity:0}}
+@keyframes open{0%{transform:scaleX(1)}100%{transform:scaleX(.14) skewY(var(--sk))}}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes zoom{from{transform:scale(1.02)}to{transform:scale(1.12)}}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.hero p{animation:up .9s 2.9s both}.hero .btns{animation:up .9s 3.2s both}
+/* o mnie */
+.me{display:grid;gap:clamp(28px,5vw,64px);grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);align-items:start}
+.me .lead{font-size:20px}
+.svc{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:22px}
+.svc div{background:var(--card);border:1px solid var(--bd);border-radius:10px;padding:16px 18px}
+.ico{width:54px;height:54px;display:block;margin-bottom:10px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ico .g{stroke:var(--oak);stroke-width:2.4}
+.ico path{stroke-dasharray:1;stroke-dashoffset:0;transition:stroke-dashoffset 1.6s ease}
+.svc.pre .ico path{stroke-dashoffset:1;transition:none}
+.svc div:nth-child(2) path{transition-delay:.15s}.svc div:nth-child(3) path{transition-delay:.3s}.svc div:nth-child(4) path{transition-delay:.45s}.svc div:nth-child(5) path{transition-delay:.6s}.svc div:nth-child(6) path{transition-delay:.75s}.svc div:nth-child(7) path{transition-delay:.9s}
+.svc b{display:block;font:500 16px Unbounded,sans-serif;margin-bottom:4px}
+.svc span{color:var(--mut);font-size:15px}
+.steps{list-style:none;margin:0;padding:0;border-left:3px solid var(--oak)}
+.steps li{position:relative;padding:0 0 22px 24px}
+.steps li:before{content:"";position:absolute;left:-9px;top:6px;width:15px;height:15px;border-radius:50%;background:var(--bg);border:3px solid var(--oak)}
+.steps b{display:block;font:500 17px Unbounded,sans-serif}
+.steps span{color:var(--mut);font-size:16px}
+@media(max-width:820px){.me{grid-template-columns:1fr}}
+/* realizacje */
+.dark{background:var(--dk);color:#ecebe7;--mut:#a9aaa6;--bd:#33363a;--card:#212325}
+.gal{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:dense;margin-top:30px}
+.it{margin:0;position:relative;border-radius:10px;overflow:hidden;background:#222;cursor:zoom-in;aspect-ratio:3/4}
+.it.wide{grid-column:span 2;aspect-ratio:auto}
+.it img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .6s}
+.it:hover img{transform:scale(1.04)}
+.it button{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:zoom-in;border:0}
+.it button:focus-visible{opacity:1;background:transparent;outline:3px solid var(--led);outline-offset:-3px}
+.it figcaption{position:absolute;inset:auto 0 0;padding:40px 16px 14px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.8));pointer-events:none}
+.it figcaption b{display:block;font:500 16px Unbounded,sans-serif;margin-bottom:2px}
+.it figcaption span{font-size:14px;color:#ddd8cf}
+@media(max-width:860px){.gal{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.gal{grid-template-columns:1fr}.it.wide{grid-column:auto;aspect-ratio:4/3}.it{aspect-ratio:4/5}}
+.dark p{max-width:640px;color:#cfccc5}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(8,8,9,.94);display:none;flex-direction:column;align-items:center;justify-content:center;padding:56px 12px 16px}
+.lb.on{display:flex}
+.lb img{max-width:100%;max-height:calc(100svh - 150px);border-radius:6px;object-fit:contain}
+.lb p{color:#e7e3dc;text-align:center;margin:12px 0 0;max-width:640px;font-size:15px}
+.lb .x,.lb .pv,.lb .nx{position:absolute;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.14);color:#fff;font-size:24px;cursor:pointer}
+.lb .x{top:10px;right:12px}.lb .pv{left:12px;top:50%}.lb .nx{right:12px;top:50%}
+.lb button:focus-visible{outline:3px solid var(--led)}
+/* kontakt */
+.ct{display:grid;gap:clamp(28px,5vw,64px);grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}
+@media(max-width:820px){.ct{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:22px}
+.who{font:700 22px Unbounded,sans-serif;margin:0 0 2px}
+.mail{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:14px}
+.mail a{font-size:19px;font-weight:600;color:var(--oak);overflow-wrap:anywhere}
+.cp{min-height:44px;padding:8px 16px;border-radius:6px;border:1px solid var(--bd);background:transparent;color:var(--ink);font:600 15px Figtree,sans-serif;cursor:pointer}
+label{display:block;font-weight:600;font-size:15px;margin:14px 0 5px}
+input,textarea{width:100%;padding:12px 14px;border:1px solid var(--bd);border-radius:8px;background:var(--bg);color:var(--ink);font:16px Figtree,sans-serif}
+textarea{min-height:130px;resize:vertical}
+.err{color:light-dark(#b3261e,#ff8a7d);font-weight:600;font-size:15px;min-height:1.4em;margin-top:8px}
+.ok{background:light-dark(#eef6ec,#1d2b1f);border-radius:8px;padding:14px;margin-top:12px;font-size:15px}
+.ok a{font-weight:600}
+footer{background:var(--dk);color:#a9aaa6;padding:30px 0;font-size:14px}
+footer .w{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;align-items:center}
+footer b{color:#fff;font:700 15px Unbounded,sans-serif}
+@media(max-width:600px){.hero .w{padding-top:90px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{animation:none!important}.mled{stroke-dashoffset:0}.door{transform:scaleX(.14)}.sk .dr{stroke-dashoffset:0}.sk .fi,.sk .led{opacity:1}.sk .chip{opacity:0}.mi{opacity:1;transform:none}.drawer,.dr-bg,.dr-p{transition:none}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <defs>
+  <linearGradient id="oak" x1="0" x2="1"><stop offset="0" stop-color="#8d5a26"/><stop offset=".45" stop-color="#c98f4f"/><stop offset="1" stop-color="#a26b33"/></linearGradient>
+  <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="2.2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  <symbol id="skt" viewBox="0 10 360 170">
+   <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+   <path stroke="#fff" stroke-width="5" opacity=".8" d="M18 30 V170 M32 30 V170 M46 30 V170"/>
+   <path stroke="#fff" stroke-width="6" d="M60 30 H262 V78 H60 Z M110 30 V78 M161 30 V78 M212 30 V78 M262 170 V22 H326 V170 M262 98 H326 M272 106 H316 V142 H272 Z M60 120 V170 H262 V120 M110 120 V170 M161 120 V170 M212 120 V170"/>
+   <path stroke="#f4bd55" stroke-width="7" d="M50 114 H266 M232 114 V98 Q232 92 240 94 M80 132 H90 M131 132 H141 M182 132 H192 M233 132 H243 M64 84 H258"/>
+   <path stroke="#fff" stroke-width="5" opacity=".8" d="M8 170 H352"/></g>
+  </symbol>
+  <g id="mark">
+   <rect class="frame" x="4" y="4" width="92" height="92" rx="6"/>
+   <line class="shelf" x1="8" y1="70" x2="92" y2="70"/>
+   <path class="mled" d="M22 62 V24 L50 50 L78 24 V62"/>
+   <g class="door l" style="--sk:8deg"><rect x="7" y="7" width="43" height="86" rx="2"/><circle class="knob" cx="43" cy="50" r="2.6"/></g>
+   <g class="door r" style="--sk:-8deg"><rect x="50" y="7" width="43" height="86" rx="2"/><circle class="knob" cx="57" cy="50" r="2.6"/></g>
+  </g>
+ </defs>
+</svg>
+
+<header class="top" id="top"><button class="mb" id="mb" aria-label="Menu" aria-expanded="false" aria-controls="drawer"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 7h18M3 12h18M3 17h18"/></svg></button></header>
+<div class="drawer" id="drawer" aria-hidden="true">
+ <div class="dr-bg" id="drbg"></div>
+ <nav class="dr-p" aria-label="Menu">
+  <div class="dr-h"><b class="dlogo"><svg viewBox="0 0 360 170" aria-hidden="true"><use href="#skt" width="360" height="170"/></svg><span>MebloMen</span></b><button class="dr-x" id="drx" aria-label="Zamknij menu"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+  <div class="mis"><a class="mi" href="#start">Strona główna</a><a class="mi" href="#o-mnie">O mnie</a><a class="mi" href="#realizacje">Realizacje</a><a class="mi" href="#kontakt">Kontakt</a></div>
+  <a class="btn" href="tel:+48502512389">Zadzwoń: 502 512 389</a>
+  <span class="dr-mail">meble.meblomen@gmail.com</span>
+ </nav>
+</div>
+
+<main>
+<section class="hero" id="start">
+ <div class="w">
+  <svg class="logo sk" viewBox="0 0 360 290" role="img" aria-label="MebloMen – stolarstwo i meble na wymiar">
+   <defs><linearGradient id="cone" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4bd55" stop-opacity=".45"/><stop offset="1" stop-color="#f4bd55" stop-opacity="0"/></linearGradient></defs>
+   <path class="dr w2" pathLength="1" d="M18 30 V170 M27 30 V170 M36 30 V170 M45 30 V170 M14 30 H49"/>
+   <path class="dr w1" pathLength="1" d="M60 30 H262 V78 H60 Z M110 30 V78 M161 30 V78 M212 30 V78"/>
+   <path class="dr w1" pathLength="1" style="animation-delay:.4s" d="M262 170 V22 H326 V170 M262 98 H326 M272 106 H316 V142 H272 Z"/>
+   <path class="dr w1" pathLength="1" style="animation-delay:.7s" d="M60 120 V170 H262 V120 M110 120 V170 M161 120 V170 M212 120 V170 M60 145 H110"/>
+   <path class="dr g" pathLength="1" style="animation-delay:1.1s" d="M50 114 H266 V120 H50 Z M232 114 V98 Q232 92 240 94 M80 128 H90 M80 153 H90 M131 128 H141 M182 128 H192 M233 128 H243 M300 62 V86 M300 110 V120"/>
+   <path class="dr w2" pathLength="1" style="animation-delay:1.3s" d="M8 170 H352"/>
+   <polygon class="fi led" points="64,80 258,80 266,114 56,114" fill="url(#cone)"/>
+   <rect class="fi led" x="64" y="79" width="194" height="3" rx="1.5" fill="#f4bd55" filter="url(#glow)"/>
+   <rect class="chip" x="120" y="112" width="4" height="2" rx="1" style="animation-delay:3s"/><rect class="chip" x="196" y="112" width="4" height="2" rx="1" style="animation-delay:4.2s"/><rect class="chip" x="150" y="112" width="4" height="2" rx="1" style="animation-delay:5.4s"/>
+   <text class="fi t1" x="180" y="240" text-anchor="middle">MebloMen</text>
+   <text class="fi t2" x="180" y="272" text-anchor="middle">STOLARSTWO · MEBLE NA WYMIAR</text>
+  </svg>
+  <h1 style="position:absolute;left:-9999px">MebloMen – meble na wymiar</h1>
+  <p>Kuchnie, szafy i zabudowy robione pod konkretne wnętrze. Od pomiaru i projektu po montaż z oświetleniem.</p>
+  <div class="btns"><a class="btn" href="#realizacje">Zobacz realizacje</a><a class="btn o" href="#kontakt">Zapytaj o wycenę</a></div>
+ </div>
+</section>
+
+<section class="band" id="o-mnie">
+ <div class="w me">
+  <div>
+   <h2>O mnie</h2>
+   <p class="lead">Nazywam się Michał Gębczyk i prowadzę MebloMen. Robię meble na wymiar, które mają pasować do wnętrza co do milimetra i dobrze służyć na co dzień.</p>
+   <p>Każde zlecenie prowadzę sam, od pierwszej rozmowy do ostatniej listwy. Dzięki temu wiesz, z kim rozmawiasz, a projekt nie gubi się po drodze.</p>
+   <div class="svc" id="svc"><div><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M6 6H42V16H6Z M18 6V16 M30 6V16 M6 28V42H42V28 M18 28V42 M30 28V42"/><path pathLength="1" class="g" d="M4 26H44 M34 26V20Q34 18 37 18 M11 32H13 M23 32H25 M35 32H37"/></svg><b>Kuchnie</b><span>w kształcie U, L, z wyspą lub barem</span></div><div><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M9 9H39V39H9Z M9 19H39 M9 29H39 M12 39V43 M36 39V43"/><path pathLength="1" class="g" d="M21 14H27 M21 24H27 M21 34H27"/></svg><b>Szafki i komody</b><span>do salonu, przedpokoju i sypialni</span></div><div><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M12 6H36V24H12Z M22 24V27H26V24 M4 30H44V42H4Z M17 30V42 M31 30V42"/><path pathLength="1" class="g" d="M8 36H13 M22 36H26 M35 36H40"/></svg><b>Zabudowy RTV</b><span>szafki pod telewizor, półki i panele</span></div><div><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M15 4H33V17H15Z M8 26H40V40H8Z M24 26V40"/><path pathLength="1" class="g" d="M8 26Q24 31 40 26 M24 23V20H28 M19 32V35 M29 32V35"/></svg><b>Meble łazienkowe</b><span>szafki pod umywalkę, słupki, lustra</span></div><div><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M4 8L44 30 M6 42V9 M6 42H42V29 M18 42V16 M30 42V22"/><path pathLength="1" class="g" d="M15 30V35 M21 30V35 M33 34V38"/></svg><b>Szafy pod skosy</b><span>wnęki, poddasza, zabudowy pod sufit</span></div><div><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M8 6V42 M15 6V42 M22 6V42 M29 6V42 M36 6V42 M4 42H44"/><path pathLength="1" class="g" d="M41 6V42"/></svg><b>Lamele z LED</b><span>ściany i sufity z podświetleniem</span></div><div><svg class="ico" viewBox="0 0 48 48" aria-hidden="true"><path pathLength="1" d="M6 27H42V42H6Z M24 27V42 M8 16V4H40V16"/><path pathLength="1" class="g" d="M5 27V23Q5 20 8 20H40Q43 20 43 23V27 M16 8V12 M24 8V12 M32 8V12 M13 34H17 M31 34H35"/></svg><b>Meble z siedziskiem</b><span>ławki do przedpokoju, siedziska ze schowkiem</span></div></div>
+  </div>
+  <div class="card">
+   <h3 style="margin-bottom:18px">Jak pracuję</h3>
+   <ol class="steps">
+    <li><b>Rozmowa i pomiar</b><span>Oglądam miejsce, mierzę i ustalamy, czego potrzebujesz.</span></li>
+    <li><b>Projekt i wycena</b><span>Dostajesz projekt z doborem materiałów, kolorów i okuć oraz konkretną cenę.</span></li>
+    <li><b>Wykonanie</b><span>Meble powstają według zatwierdzonego projektu.</span></li>
+    <li style="padding-bottom:0"><b>Montaż</b><span>Montuję na miejscu, razem z oświetleniem i wykończeniem.</span></li>
+   </ol>
+  </div>
+ </div>
+</section>
+
+<section class="band dark" id="realizacje">
+ <div class="w">
+  <h2>Realizacje</h2>
+  <p>Kilka kuchni, które zaprojektowałem, wykonałem i zamontowałem. Kliknij zdjęcie, żeby je powiększyć.</p>
+  <div class="gal" id="gal"></div>
+ </div>
+</section>
+
+<section class="band" id="kontakt">
+ <div class="w ct">
+  <div>
+   <h2>Kontakt</h2>
+   <p>Zadzwoń albo napisz, co chcesz zrobić, a odezwę się, żeby umówić pomiar i przygotować wycenę.</p>
+   <div class="card">
+    <p class="who">Michał Gębczyk</p>
+    <span style="color:var(--mut)">MebloMen · stolarstwo i meble na wymiar</span>
+    <div class="mail"><a href="tel:+48502512389">502 512 389</a><button class="cp" data-c="502512389" type="button">Kopiuj numer</button></div>
+    <div class="mail"><a href="mailto:meble.meblomen@gmail.com">meble.meblomen@gmail.com</a><button class="cp" data-c="meble.meblomen@gmail.com" type="button">Kopiuj adres</button></div>
+   </div>
+  </div>
+  <form class="card" id="f" novalidate>
+   <h3>Zapytanie o wycenę</h3>
+   <label for="n">Imię</label><input id="n" autocomplete="name">
+   <label for="e">E-mail</label><input id="e" type="email" autocomplete="email">
+   <label for="m">Co chcesz zrobić?</label><textarea id="m" placeholder="Np. kuchnia w kształcie L, około 4 m, czarne fronty i blat w dębie"></textarea>
+   <div class="err" id="er" aria-live="polite"></div>
+   <button class="btn" type="submit">Przygotuj wiadomość</button>
+   <div id="ok"></div>
+  </form>
+ </div>
+</section>
+</main>
+<div class="lb" id="lb" role="dialog" aria-modal="true" aria-label="Powiększone zdjęcie"><button class="x" id="lbx" aria-label="Zamknij">✕</button><button class="pv" id="lbp" aria-label="Poprzednie">‹</button><img id="lbi" alt=""><p id="lbt"></p><button class="nx" id="lbn" aria-label="Następne">›</button></div>
+
+<footer><div class="w"><b>MebloMen</b><span>Michał Gębczyk · tel. 502 512 389 · meble.meblomen@gmail.com</span><span>All rights reserved 2026 MebloMen</span></div></footer>
+
+<script>
+{
+ const top=document.getElementById('top');
+ const onScroll=()=>top.classList.toggle('on',scrollY>40);
+ addEventListener('scroll',onScroll,{passive:true});onScroll();
+ const dw=document.getElementById('drawer'),mb=document.getElementById('mb');
+ const setD=o=>{dw.classList.toggle('open',o);dw.setAttribute('aria-hidden',!o);mb.setAttribute('aria-expanded',o);document.body.style.overflow=o?'hidden':'';if(o)document.getElementById('drx').focus();else mb.focus()};
+ mb.addEventListener('click',()=>setD(true));
+ document.getElementById('drx').addEventListener('click',()=>setD(false));
+ document.getElementById('drbg').addEventListener('click',()=>setD(false));
+ for(const a of document.querySelectorAll('.mi'))a.addEventListener('click',()=>setD(false));
+ addEventListener('keydown',e=>{if(e.key==='Escape'&&dw.classList.contains('open'))setD(false)});
+ const mis=[...document.querySelectorAll('.mi')];
+ const io=new IntersectionObserver(es=>{for(const e of es)if(e.isIntersecting)mis.forEach(a=>a.classList.toggle('on',a.getAttribute('href')==='#'+e.target.id))},{rootMargin:'-45% 0px -50% 0px'});
+ for(const id of['start','o-mnie','realizacje','kontakt'])io.observe(document.getElementById(id));
+ const svc=document.getElementById('svc');
+ if(!matchMedia('(prefers-reduced-motion: reduce)').matches){svc.classList.add('pre');const so=new IntersectionObserver(es=>{if(es[0].isIntersecting){requestAnimationFrame(()=>svc.classList.remove('pre'));so.disconnect()}},{threshold:.25});so.observe(svc)}
+ const MAIL='meble.meblomen@gmail.com';
+ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ for(const b of document.querySelectorAll('.cp')){const t=b.textContent;b.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(b.dataset.c);b.textContent='Skopiowano'}catch(e){b.textContent=b.dataset.c}setTimeout(()=>b.textContent=t,2200)})}
+ const R=[
+  ['k1.jpg','','Czarny mat, dąb i lamele','Kuchnia w kształcie U, fronty bez uchwytów, zabudowa pod sufit, rama z lameli z ciepłym LED.'],
+  ['k2.jpg','','Jasna kuchnia z ryflowaniem','Układ L, ryflowane szafki nad blatem, złote gałki, słupek na piekarnik i mikrofalę.'],
+  ['k3.jpg','wide','Dąb, kamień i duże okno','Kuchnia w kształcie U, fronty w dekorze dębu z uchwytami krawędziowymi, kamienny blat i ściana.'],
+  ['k4.jpg','','Kremowy połysk i orzech','Zabudowa w kształcie U z półwyspem barowym i blatem w kolorze orzecha.'],
+  ['k5.jpg','wide','Kuchnia z wyspą','Beżowe fronty, ryflowane szafki, złote uchwyty, blat w dębie i zabudowana lodówka.'],
+  ['k6.jpg','','Jasnoszara kuchnia w L','Szafki pod sufit, czarne uchwyty, słupek z piekarnikiem i blat w dekorze drewna.']
+ ];
+ const gal=document.getElementById('gal');
+ gal.innerHTML=R.map((r,i)=>`<figure class="it ${r[1]}"><img src="img/${r[0]}" alt="${esc(r[2])}" loading="lazy"><figcaption><b>${esc(r[2])}</b><span>${esc(r[3])}</span></figcaption><button type="button" data-i="${i}" aria-label="Powiększ: ${esc(r[2])}"></button></figure>`).join('');
+ const lb=document.getElementById('lb'),lbi=document.getElementById('lbi'),lbt=document.getElementById('lbt');let cur=0,last=null;
+ const show=i=>{cur=(i+R.length)%R.length;lbi.src='img/'+R[cur][0];lbi.alt=R[cur][2];lbt.textContent=R[cur][2]+' – '+R[cur][3]};
+ const close=()=>{lb.classList.remove('on');document.body.style.overflow='';last&&last.focus()};
+ gal.addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(!b)return;last=b;show(+b.dataset.i);lb.classList.add('on');document.body.style.overflow='hidden';document.getElementById('lbx').focus()});
+ document.getElementById('lbx').addEventListener('click',close);
+ document.getElementById('lbp').addEventListener('click',()=>show(cur-1));
+ document.getElementById('lbn').addEventListener('click',()=>show(cur+1));
+ lb.addEventListener('click',e=>{if(e.target===lb)close()});
+ addEventListener('keydown',e=>{if(!lb.classList.contains('on'))return;if(e.key==='Escape')close();if(e.key==='ArrowLeft')show(cur-1);if(e.key==='ArrowRight')show(cur+1)});
+ document.getElementById('f').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  const n=document.getElementById('n').value.trim(),e=document.getElementById('e').value.trim(),m=document.getElementById('m').value.trim();
+  const er=document.getElementById('er'),ok=document.getElementById('ok');ok.innerHTML='';
+  if(!n||!m){er.textContent='Wpisz imię i opis tego, co chcesz zrobić.';return}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e)){er.textContent='Podaj poprawny adres e-mail, np. jan@poczta.pl.';return}
+  er.textContent='';
+  const body=`${m}\n\n${n}\n${e}`;
+  const href=`mailto:${MAIL}?subject=${encodeURIComponent('Zapytanie o wycenę – '+n)}&body=${encodeURIComponent(body)}`;
+  ok.innerHTML=`<div class="ok">Wiadomość jest gotowa. <a href="${esc(href)}">Otwórz ją w poczcie</a> i kliknij Wyślij albo napisz bezpośrednio na ${MAIL}. Możesz też zadzwonić: 502 512 389.</div>`;
+ });
+}
+</script>
+</body>
+</html>
